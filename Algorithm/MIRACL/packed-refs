@@ -1,0 +1,3 @@
+# pack-refs with: peeled fully-peeled 
+5c7fcd96dab0785401747c82dc5c5fd324d60c6c refs/remotes/origin/fixmac
+b9b8fd471de253cfd6313446cb490741edb069a7 refs/remotes/origin/master
