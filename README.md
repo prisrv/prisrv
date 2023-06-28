@@ -9,7 +9,7 @@ PRISRV is a demo of the scheme in the paper "PriSrv: Private Service Discovery w
 
 
 
-## Compile ans test prisvc
+## Compile and test prisrv
 
 ```sh
 make algorithm
