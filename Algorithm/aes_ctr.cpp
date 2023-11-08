@@ -1,6 +1,6 @@
 #include "aes_ctr.h"
 #define AES_NK 16
-#define AES_DATA_LEN 2048
+#define AES_DATA_LEN 3072
 
 AES_CTR::AES_CTR()
 {
@@ -18,6 +18,15 @@ int AES_CTR::init(char *key,char *ctr)
     DataLen=0;    
     return AesCtrInitialiseWithKey( &State, (uint8_t const*)key, 16, (uint8_t const*)ctr );
     //return aes_init(&State,MR_ECB,AES_NK,key,NULL);
+}
+
+int AES_CTR::encrypt_add(unsigned char *data, int add_len)
+{
+    if(DataLen+add_len > AES_DATA_LEN)
+        return -1;
+    memcpy(Data+DataLen,data,add_len);
+    DataLen=DataLen+add_len;
+    return 0;
 }
 
 int AES_CTR::encrypt_add(Big &data)
@@ -92,6 +101,13 @@ int AES_CTR::decrypt_data(char *cipher, unsigned int cipher_len)
  //   printf("decrypt_data DataLen=%d\n",DataLen);
     return 0;
     
+}
+int AES_CTR::decrypt_red(unsigned char *data, int *add_len)
+{
+    memcpy(data,Data,DataLen);
+    *add_len = DataLen;
+    DataLen=0;
+    return 0;
 }
 int AES_CTR::decrypt_red(Big &data)
 {

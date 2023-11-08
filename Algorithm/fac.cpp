@@ -65,7 +65,7 @@ int FAC::UserKeyGen(FAC_USER_KEY &user_key)
 }
 int FAC::IssueUser_Send(FAC_USER_KEY &user_key,USER_ATTR &attr,Big &uid,FAC_SPK1 &spk1)
 {
-    //generate uid and attri
+    //generate uid and attri randomly
     pfc->random(uid);
     for(int i=1;i<FAC_PARA_N+1;i++)
         pfc->random(attr.x[i]);
@@ -172,7 +172,7 @@ int FAC::Show(FAC_CRED_KEY_PK &pk,FAC_CRED_U &cred_u,USER_ATTR &attr,FAC_USER_DI
     for(int i=0;i<FAC_PARA_D+1;i++)
         SUM=SUM+pk.Y[i];
     SUM=pfc->mult(SUM,t1);
-#if 0
+#if 0//test
     for(int j=FAC_PARA_N-FAC_PARA_D+2;j<FAC_PARA_N+1;j++)
     {
         A1=pfc->mult(pk.Z[FAC_PARA_D+1][j],attr.x[j]);
@@ -313,8 +313,6 @@ int FAC::Verify(FAC_CRED_KEY_PK &pk,FAC_TOK &tok,Big &m,FAC_USER_DISCLOSE_ATTR &
 
 
 #endif
-
-
     //
     SUM=pk.W+tok.T1;
     for(int i=0;i<FAC_PARA_D;i++)

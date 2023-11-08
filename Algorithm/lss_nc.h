@@ -1,8 +1,10 @@
 #ifndef LSS_NC_H
 #define LSS_NC_H
 #include "pairing_3.h"
-#define LSS_NC_PARA_N 3//= CP_ABE_PARA_N
+
+#define LSS_NC_PARA_N 3 
 #define LSS_NC_SHARE_NUM 9
+
 struct LSS_NC_SHARE_INFO
 {
     Big bu[LSS_NC_SHARE_NUM];

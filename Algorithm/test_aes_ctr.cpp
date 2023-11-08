@@ -13,7 +13,11 @@ int main()
     pfc.random(g2);
     gt=pfc.pairing(g2,g1);
     AES_CTR aec_ctr;
-    char key[16],iv[16],cipher[1024];
+    unsigned char msg[512]={0},msg1[512]={0};
+    int len =512,len1=0;
+    for(int i=0;i<512;i++)
+        msg[i]=0xff;
+    char key[16],iv[16],cipher[2048];
     unsigned int cipher_len=0;
     for(int i=0;i<16;i++)
     {
@@ -21,6 +25,13 @@ int main()
         iv[i]=i;
     }
     aec_ctr.init(key,iv);
+    ret =aec_ctr.encrypt_add(msg,len);
+    if(ret !=0)
+    {
+        printf("encrypt_add char erro ret=%d\n",ret);
+        return -1;
+    }
+
     ret =aec_ctr.encrypt_add(g);
     if(ret !=0)
     {
@@ -45,6 +56,7 @@ int main()
         printf("encrypt_add GT erro ret=%d\n",ret);
         return -1;
     }
+
     ret =aec_ctr.encrypt_data(cipher,&cipher_len);
     if(ret !=0)
     {
@@ -55,7 +67,7 @@ int main()
     {
         printf("encrypt_data sunccess , cipher_len =%d\n",cipher_len);
     }
-    
+    ////////////////////////////////////////
     aec_ctr.init(key,iv);
     ret =aec_ctr.decrypt_data(cipher,cipher_len);
     if(ret !=0)
@@ -63,6 +75,7 @@ int main()
         printf("decrypt_data erro ret=%d\n",ret);
         return -1;
     }
+
     ret =aec_ctr.decrypt_red(gt_);
     if(ret !=0)
     {
@@ -105,6 +118,18 @@ int main()
     else if(g != g_)
     {
         printf("decrypt big erro\n");
+        return -2;
+    }
+
+    ret =aec_ctr.decrypt_red(msg1,&len1);
+    if(ret !=0)
+    {
+        printf("decrypt_red char erro ret=%d\n",ret);
+        return -1;
+    }
+    else if(msg[0] != msg1[0])
+    {
+        printf("decrypt char erro\n");
         return -2;
     }
     else

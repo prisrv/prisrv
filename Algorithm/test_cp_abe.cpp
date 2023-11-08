@@ -1,11 +1,13 @@
 #include"cp_abe.h"
-
+#include<time.h>
 #define AES_SECURITY 128
 int correct()
 {
     PFC pfc(AES_SECURITY);
     CP_ABE cp_abe(&pfc);
+    srand(time(NULL));
 
+    
     int ret =0;
     CP_ABE_MSK msk;
     CP_ABE_MPK mpk;
@@ -70,12 +72,14 @@ int speed_test()
     int i;
     clock_t start,finish;
     double sum;
+    srand(time(NULL));
+
 
     PFC pfc(AES_SECURITY);
     CP_ABE cp_abe(&pfc);
     printf("#################test cp-abe speed start#######################\n");
-    printf("The number of user attributes `n` is %d \n",CP_ABE_PARA_N);
-    printf("The para of key `k` is %d \n",CP_ABE_PARA_K);
+    printf("The para of ACME `n` is %d \n",CP_ABE_PARA_N);
+    printf("The para of ACME `k` is %d \n",CP_ABE_PARA_K);
     int ret =0;
     CP_ABE_MSK msk;
     CP_ABE_MPK mpk;
@@ -94,8 +98,14 @@ int speed_test()
     printf("cp_abe.SetUp ret : %d time =%f sec\n",ret,sum);
     CP_APE_X X;
     CP_ABE_SK sk;
-    X.x[0]=1;X.x[2]=1;
-    X.x[1]=0;
+    for(i=0;i<CP_ABE_PARA_N;i++)
+    {
+        if((i& 0x01) == 0)
+            X.x[i] = 1;
+        else
+            X.x[i] = 0;
+    }
+   //X.x[0]=1;X.x[2]=1;X.x[4]=1;X.x[6]=1;X.x[8]=1;
     start=clock();
     for(i=0;i<TEST_TIME;i++)
     {

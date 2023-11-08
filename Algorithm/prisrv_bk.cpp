@@ -211,104 +211,30 @@ int PriSrv::Broadcast(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cr
 
     pfc->random(service_z);
     msg_b.Z=pfc->mult(*pfc->hh,service_z);
-
-    MACddh_PK pk;
-    mac_ddh.KeyGen(msg_b.K_c,pk);
     Big M;
     pfc->random(M);
-
-    BN_transfer BNT;
-    unsigned char msg[1040]={0};
-    int len=0;
-    Big_C bc;
-    G2_C g2c;
-    BNT.Trf_Big_to_Char(msg_b.bid,bc);
-    memcpy(msg+len,&bc,sizeof(Big_C));
-    len+= sizeof(Big_C);
-    BNT.Trf_G2_to_Char(msg_b.Z,g2c);
-    memcpy(msg+len,&g2c,sizeof(G2_C));
-    len+= sizeof(G2_C);
-    BNT.Trf_Big_to_Char(msg_b.Service_par,bc);
-    memcpy(msg+len,&bc,sizeof(Big_C));
-    len+= sizeof(Big_C);
-    BNT.Trf_Big_to_Char(msg_b.Service_type,bc);
-    memcpy(msg+len,&bc,sizeof(Big_C));
-    len+= sizeof(Big_C);
-    for(int i=0;i<MACddh_PARA_N+1;i++)
-    {
-        BNT.Trf_Big_to_Char(msg_b.K_c.x[i],bc);
-        memcpy(msg+len,&bc,sizeof(Big_C));
-        len+= sizeof(Big_C);
-    }
-    for(int i=0;i<MACddh_PARA_N+1;i++)
-    {
-        BNT.Trf_Big_to_Char(msg_b.K_c.y[i],bc);
-        memcpy(msg+len,&bc,sizeof(Big_C));
-        len+= sizeof(Big_C);        
-    }
-    BNT.Trf_Big_to_Char(msg_b.K_c.z,bc);
-    memcpy(msg+len,&bc,sizeof(Big_C));
-    len+= sizeof(Big_C);   
-#if 0//test
-    printf(" msgb len =%d\n",len);
-#endif
-    return acme.Enc(mpk, cred_key_pk, cred_s, service_key, service_attr, msg_b.bid, X_s, M, msg, len, cipher);
+    return acme.Enc(mpk, cred_key_pk, cred_s, service_key, service_attr, msg_b.bid, X_s, M, cipher);
 }
-
 int PriSrv::AMA_Cinit(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cred_c, ACME_USER_KEY &client_key, ACME_ABE_DK_X_REC &Dk_C_xrec, ACME_ABE_DK_f_REC &DK_C_frec, ACME_X &X_s, ACME_X &X_c, USER_ATTR &client_attr, Big &uid,\
-                      ACME_CIPHER &cipher,PriSrv_C1 &C1_msg)
+                      ACME_CIPHER &cipher, PriSrv_MSG_B &msg_b, Big &x, PriSrv_C1 &C1_msg)
 {
     ACME_PLAIN plain;
 //    int ret=0;
-
+#if 1
     int ret = acme.Den(cred_key_pk, Dk_C_xrec, DK_C_frec, X_s, X_c, cipher, plain);
     if(ret != 0)
     {
         printf("acme.Den erro! ret=%d\n",ret);
         return -1;
     }
-
-    PriSrv_MSG_B msg_b;
-    BN_transfer BNT;
-    int len = 0;
-    Big_C bc;
-    G2_C g2c;
-    memcpy(&bc, plain.msg+len,sizeof(Big_C));
-    BNT.Trf_Char_to_Big(bc,msg_b.bid);   
-    len+= sizeof(Big_C);
-    memcpy(&g2c,plain.msg+len,sizeof(G2_C));
-    BNT.Trf_Char_to_G2(g2c,msg_b.Z);    
-    len+= sizeof(G2_C);
-    memcpy(&bc, plain.msg+len,sizeof(Big_C));
-    BNT.Trf_Char_to_Big(bc,msg_b.Service_par);   
-    len+= sizeof(Big_C);
-    memcpy(&bc, plain.msg+len,sizeof(Big_C));
-    BNT.Trf_Char_to_Big(bc,msg_b.Service_type);   
-    len+= sizeof(Big_C);
-
-    for(int i=0;i<MACddh_PARA_N+1;i++)
-    {
-        memcpy(&bc, plain.msg+len,sizeof(Big_C));
-        BNT.Trf_Char_to_Big(bc,msg_b.K_c.x[i]);   
-        len+= sizeof(Big_C);
-       
-    }
-    for(int i=0;i<MACddh_PARA_N+1;i++)
-    {
-        memcpy(&bc, plain.msg+len,sizeof(Big_C));
-        BNT.Trf_Char_to_Big(bc,msg_b.K_c.y[i]);   
-        len+= sizeof(Big_C);      
-    }
-    memcpy(&bc, plain.msg+len,sizeof(Big_C));
-    BNT.Trf_Char_to_Big(bc,msg_b.K_c.z);   
-    len+= sizeof(Big_C); 
-    
+#endif
     C1_msg.msg_c.M_c.Z=msg_b.Z;
     pfc->random(C1_msg.x1);
     pfc->random(C1_msg.x2);
     C1_msg.msg_c.M_c.X1=pfc->mult(*pfc->gg,C1_msg.x1);
     C1_msg.msg_c.M_c.X2=pfc->mult(*pfc->hh,C1_msg.x2);
-    
+    MACddh_PK pk;
+    mac_ddh.KeyGen(C1_msg.msg_c.K_c,pk);
     //MacDDH
     Big CS,X1,X2,Z;
     pfc->start_hash();
@@ -332,137 +258,54 @@ int PriSrv::AMA_Cinit(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cr
     M.m[3]=X1;
     M.m[4]=X2;
     M.m[5]=Z;
-    ret = mac_ddh.MAC(msg_b.K_c,M,C1_msg.sigma_c);
+    ret = mac_ddh.MAC(C1_msg.msg_c.K_c,M,C1_msg.sigma_c);
     if(ret != 0) return -2;
     Big m;
     pfc->random(m);
-
-    MACddh_PK pk;
-    mac_ddh.KeyGen(C1_msg.msg_c.K_s,pk);
-
-    //////////////////////////////////
-    unsigned char msg[2560]={0};
-    len=0;
-    G1_C g1c;
-    for(int i=0;i<MACddh_PARA_N+1;i++)
-    {
-        BNT.Trf_Big_to_Char(C1_msg.msg_c.K_s.x[i],bc);
-        memcpy(msg+len,&bc,sizeof(Big_C));
-        len+= sizeof(Big_C);
-    }
-    for(int i=0;i<MACddh_PARA_N+1;i++)
-    {
-        BNT.Trf_Big_to_Char(C1_msg.msg_c.K_s.y[i],bc);
-        memcpy(msg+len,&bc,sizeof(Big_C));
-        len+= sizeof(Big_C);        
-    }
-    BNT.Trf_Big_to_Char(C1_msg.msg_c.K_s.z,bc);
-    memcpy(msg+len,&bc,sizeof(Big_C));
-    len+= sizeof(Big_C);  
-    //
-    BNT.Trf_Big_to_Char(C1_msg.msg_c.M_c.bid,bc);
-    memcpy(msg+len,&bc,sizeof(Big_C));
-    len+= sizeof(Big_C);
-    BNT.Trf_Big_to_Char(C1_msg.msg_c.M_c.sid,bc);
-    memcpy(msg+len,&bc,sizeof(Big_C));
-    len+= sizeof(Big_C);
-    BNT.Trf_G1_to_Char(C1_msg.msg_c.M_c.X1,g1c);
-    memcpy(msg+len,&g1c,sizeof(G1_C));
-    len+= sizeof(G1_C);
-    BNT.Trf_G2_to_Char(C1_msg.msg_c.M_c.X2,g2c);
-    memcpy(msg+len,&g2c,sizeof(G2_C));
-    len+= sizeof(G2_C);
-    BNT.Trf_G2_to_Char(C1_msg.msg_c.M_c.Z,g2c);
-    memcpy(msg+len,&g2c,sizeof(G2_C));
-    len+= sizeof(G2_C);
-
-    #if 0//test
-    printf(" msgb len =%d\n",len);
-    #endif
-
-    /////////////////////////////
-    ret = acme.Enc(mpk,  cred_key_pk, cred_c, client_key, client_attr, uid, X_c, m,msg,len, C1_msg.CT);
+    ret = acme.Enc(mpk,  cred_key_pk, cred_c, client_key, client_attr, uid, X_c, m, C1_msg.CT);
     if(ret != 0) return -3;
     return 0;
 
 }
-
-int PriSrv::AMA_S(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cred_s, ACME_USER_KEY &service_key, Big &service_z,USER_ATTR &service_attr, Big &sid, ACME_ABE_DK_X_REC &Dk_S_xrec, ACME_ABE_DK_f_REC &DK_S_frec, ACME_X &X_s, ACME_X &X_c, PriSrv_MSG_B &msg_b, PriSrv_C1 &C1_msg, PriSrv_S &S_msg, PriSrv_SSK &ssk)
+int PriSrv::AMA_S(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cred_s, ACME_USER_KEY &service_key, Big &service_z,USER_ATTR &service_attr, Big &sid, ACME_ABE_DK_X_REC &Dk_S_xrec, ACME_ABE_DK_f_REC &DK_S_frec, ACME_X &X_s, ACME_X &X_c, PriSrv_C1 &C1_msg, PriSrv_S &S_msg, PriSrv_SSK &ssk)
 {
     ACME_PLAIN plain;
     //int ret =0;
+#if 1
     int ret =acme.Den(cred_key_pk, Dk_S_xrec, DK_S_frec, X_c, X_s, C1_msg.CT, plain);
     if(ret !=0) return -1;
-    PriSrv_MSG_C msg_c;
-    BN_transfer BNT;
-    int len=0;
-    Big_C bc;
-    G2_C g2c;
-    G1_C g1c;
-    for(int i=0;i<MACddh_PARA_N+1;i++)
-    {
-        memcpy(&bc,plain.msg+len,sizeof(Big_C));
-        BNT.Trf_Char_to_Big(bc,msg_c.K_s.x[i]);
-        len+= sizeof(Big_C);
-    }
-    for(int i=0;i<MACddh_PARA_N+1;i++)
-    {
-        memcpy(&bc,plain.msg+len,sizeof(Big_C));
-        BNT.Trf_Char_to_Big(bc,msg_c.K_s.y[i]);
-        len+= sizeof(Big_C);    
-    }
-    memcpy(&bc,plain.msg+len,sizeof(Big_C));
-    BNT.Trf_Char_to_Big(bc,msg_c.K_s.z);
-    len+= sizeof(Big_C);   
-    //
-    memcpy(&bc,plain.msg+len,sizeof(Big_C));
-    BNT.Trf_Char_to_Big(bc,msg_c.M_c.bid);
-    len+= sizeof(Big_C); 
-    memcpy(&bc,plain.msg+len,sizeof(Big_C));
-    BNT.Trf_Char_to_Big(bc,msg_c.M_c.sid);
-    len+= sizeof(Big_C); 
-    memcpy(&g1c,plain.msg+len,sizeof(G1_C));
-    BNT.Trf_Char_to_G1(g1c,msg_c.M_c.X1);
-    len+= sizeof(G1_C); 
-    memcpy(&g2c,plain.msg+len,sizeof(G2_C));
-    BNT.Trf_Char_to_G2(g2c,msg_c.M_c.X2);
-    len+= sizeof(G2_C); 
-    memcpy(&g2c,plain.msg+len,sizeof(G2_C));
-    BNT.Trf_Char_to_G2(g2c,msg_c.M_c.Z);
-    len+= sizeof(G2_C); 
-#if 0//test
-    printf("dec len =%d, mslen=%d\n",len,plain.m_Len);
 #endif
     //MacDDH
     MACddh_M Mc;
     Big CS,X1,X2,Z;
     pfc->start_hash();
-    pfc->add_to_hash(msg_c.M_c.X1);
+    pfc->add_to_hash(C1_msg.msg_c.M_c.X1);
     X1=pfc->finish_hash_to_group();
     pfc->start_hash();
-    pfc->add_to_hash(msg_c.M_c.X2);
+    pfc->add_to_hash(C1_msg.msg_c.M_c.X2);
     X2=pfc->finish_hash_to_group();
     pfc->start_hash();
-    pfc->add_to_hash(msg_c.M_c.Z);
+    pfc->add_to_hash(C1_msg.msg_c.M_c.Z);
     Z=pfc->finish_hash_to_group();
     char C_S[]="C to S";
     pfc->start_hash();
     pfc->add_to_hash(C_S);
     CS=pfc->finish_hash_to_group();
-    Mc.m[1]=msg_c.M_c.bid;
-    Mc.m[2]=msg_c.M_c.sid;
+    Mc.m[1]=C1_msg.msg_c.M_c.bid;
+    Mc.m[2]=C1_msg.msg_c.M_c.sid;
     Mc.N=6;
     Mc.m[0]=CS;
     Mc.m[3]=X1;
     Mc.m[4]=X2;
     Mc.m[5]=Z;
 
-    ret = mac_ddh.Verify(msg_b.K_c,Mc,C1_msg.sigma_c);
+    ret = mac_ddh.Verify(C1_msg.msg_c.K_c,Mc,C1_msg.sigma_c);
     if(ret !=0) return -2;
     Big y;
     pfc->random(y);
     S_msg.Y=pfc->mult(*pfc->gg,y);
-    
+    MACddh_PK pk;
+    ret = mac_ddh.KeyGen(S_msg.msg_s.Ks,pk);
     if(ret !=0) return -3;
     char S_C[]="S to C";
     pfc->start_hash();
@@ -479,22 +322,43 @@ int PriSrv::AMA_S(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cred_s
     Mc.m[4]=X2;
     Mc.m[5]=Y;
     Mc.m[5]=Z;
-    ret = mac_ddh.MAC(msg_c.K_s,Mc,S_msg.sigma_s);
+    ret = mac_ddh.MAC(S_msg.msg_s.Ks,Mc,S_msg.sigma_s);
     if(ret != 0) return -2;
 
-    G1 X1y=pfc->mult(msg_c.M_c.X1,y);
-    G2 X2z=pfc->mult(msg_c.M_c.X2,service_z);
+#if 0 //delete
+    Big M;
+    pfc->random(M);
+    ret = acme.Enc(mpk,  cred_key_pk, cred_s, service_key, service_attr, sid, X_s, M, S_msg.CT);
+    if(ret !=0) return -4;
+#endif
+
+    G1 X1y=pfc->mult(C1_msg.msg_c.M_c.X1,y);
+    G2 X2z=pfc->mult(C1_msg.msg_c.M_c.X2,service_z);
     pfc->start_hash();
     pfc->add_to_hash(X1y);
     pfc->add_to_hash(X2z);
+    pfc->add_to_hash(C1_msg.sigma_c.sig_w);
+    pfc->add_to_hash(C1_msg.sigma_c.sig_x);
+    pfc->add_to_hash(C1_msg.sigma_c.sig_y);
+    pfc->add_to_hash(C1_msg.sigma_c.sig_z);
+    pfc->add_to_hash(S_msg.sigma_s.sig_w);
+    pfc->add_to_hash(S_msg.sigma_s.sig_x);
+    pfc->add_to_hash(S_msg.sigma_s.sig_y);
+    pfc->add_to_hash(S_msg.sigma_s.sig_z);
     ssk.ssk=pfc->finish_hash_to_group();
     return 0;
 }
-
 int PriSrv::AMA_Cverify(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cred_c, ACME_USER_KEY &client_key, ACME_ABE_DK_X_REC &Dk_C_xrec, ACME_ABE_DK_f_REC &DK_C_frec,\
-                        ACME_X &X_s, ACME_X &X_c, USER_ATTR &client_attr, Big &uid,\
+                        ACME_X &X_s, ACME_X &X_c, USER_ATTR &client_attr, Big &uid,Big &x, \
                         PriSrv_C1 &C1_msg, PriSrv_S &S_msg,PriSrv_SSK &ssk)
 {
+#if 0 //delete
+    ACME_PLAIN plain;
+    //int ret =0;
+
+    int ret = acme.Den(cred_key_pk, Dk_C_xrec, DK_C_frec, X_s, X_c, S_msg.CT, plain);
+    if(ret != 0) return -1;
+#endif
     MACddh_M Mc;
     char S_C[]="S to C";
     Big X1,X2,Z;
@@ -521,13 +385,21 @@ int PriSrv::AMA_Cverify(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &
     Mc.m[4]=X2;
     Mc.m[5]=Y;
     Mc.m[5]=Z;
-    int ret = mac_ddh.Verify(C1_msg.msg_c.K_s,Mc,S_msg.sigma_s);
+    int ret = mac_ddh.Verify(S_msg.msg_s.Ks,Mc,S_msg.sigma_s);
     if(ret !=0) return -2;
     G1 Yx1=pfc->mult(S_msg.Y,C1_msg.x1);
     G2 Zx2=pfc->mult(C1_msg.msg_c.M_c.Z,C1_msg.x2);
     pfc->start_hash();
     pfc->add_to_hash(Yx1);
     pfc->add_to_hash(Zx2);
+    pfc->add_to_hash(C1_msg.sigma_c.sig_w);
+    pfc->add_to_hash(C1_msg.sigma_c.sig_x);
+    pfc->add_to_hash(C1_msg.sigma_c.sig_y);
+    pfc->add_to_hash(C1_msg.sigma_c.sig_z);
+    pfc->add_to_hash(S_msg.sigma_s.sig_w);
+    pfc->add_to_hash(S_msg.sigma_s.sig_x);
+    pfc->add_to_hash(S_msg.sigma_s.sig_y);
+    pfc->add_to_hash(S_msg.sigma_s.sig_z);
     ssk.ssk=pfc->finish_hash_to_group();
     return 0;
 }

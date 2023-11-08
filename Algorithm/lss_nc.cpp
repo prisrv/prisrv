@@ -10,6 +10,11 @@ LSS_NC::~LSS_NC()
 }
 int LSS_NC::share(G1 &u, LSS_NC_SHARE_INFO &share_info)
 {
+    if((LSS_NC_PARA_N !=3) || (LSS_NC_SHARE_NUM != 9)) 
+    {
+        printf("Parameter Erro: LSS_NC_PARA_N  !=3 or LSS_NC_SHARE_NUM != 9\n");
+        return -1; 
+    }
     //u
     G1 u5,u6;
     pfc->random(share_info.u[0]);//u1
@@ -55,6 +60,11 @@ int LSS_NC::share(G1 &u, LSS_NC_SHARE_INFO &share_info)
 }
 int LSS_NC::reconstruct(LSS_NC_SHARE_INFO &share_info, G1 &u)
 {
+    if((LSS_NC_PARA_N !=3) || (LSS_NC_SHARE_NUM != 9))
+    {
+        printf("Parameter Erro: LSS_NC_PARA_N  !=3 or LSS_NC_SHARE_NUM != 9\n");
+        return -1; 
+    }
     u=pfc->mult(share_info.u[0],share_info.w[0]);
     for(int i=1;i<LSS_NC_SHARE_NUM;i++)
     {
@@ -62,7 +72,7 @@ int LSS_NC::reconstruct(LSS_NC_SHARE_INFO &share_info, G1 &u)
         u=u+T;
     }
 
-#if 0
+#if 0//test
     G1 u5=share_info.u[4]+(-share_info.u[0]);
     u=share_info.u[7]+(-u5);
 #endif
@@ -70,6 +80,11 @@ int LSS_NC::reconstruct(LSS_NC_SHARE_INFO &share_info, G1 &u)
 }
 int LSS_NC::share(Big &u,LSS_NC_SHARE_INFO &share_info)
 {
+    if((LSS_NC_PARA_N !=3) || (LSS_NC_SHARE_NUM != 9))
+    {
+        printf("Parameter Erro: LSS_NC_PARA_N  !=3 or LSS_NC_SHARE_NUM != 9\n");
+        return -1; 
+    }
     //u
     Big u5,u6;
     pfc->random_ord(share_info.bu[0]);//u1
@@ -115,7 +130,7 @@ int LSS_NC::share(Big &u,LSS_NC_SHARE_INFO &share_info)
 }
 int LSS_NC::reconstruct(LSS_NC_SHARE_INFO &share_info,Big &u)
 {
-#if 0
+#if 0//test
     Big B=share_info.w[0];
     u=pfc->Zpmulti(share_info.bu[0],B);
     for(int i=1;i<LSS_NC_SHARE_NUM;i++)
@@ -125,7 +140,12 @@ int LSS_NC::reconstruct(LSS_NC_SHARE_INFO &share_info,Big &u)
         u=u+T;
     }
     return 0;
-#else //test
+#else 
+    if((LSS_NC_PARA_N !=3) || (LSS_NC_SHARE_NUM != 9))
+    {
+        printf("Parameter Erro: LSS_NC_PARA_N !=3 or LSS_NC_SHARE_NUM != 9\n");
+        return -1; 
+    }
     Big u5=pfc->Zpsub(share_info.bu[4],share_info.bu[0]);
     u=pfc->Zpsub(share_info.bu[7],u5);
     return 0;

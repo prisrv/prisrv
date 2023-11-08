@@ -100,7 +100,10 @@ int correct()
     ACME_CIPHER cipher;
     ACME_PLAIN plain;
     pfc.random(M);
-    ret =acme.Enc(mpk,  cred_key, cred_u, user_key, attr, uid, X_snd, M, cipher);
+    unsigned char msg[512]={0xff},msg1[512]={0};
+    int len =512,len1=0;
+    
+    ret =acme.Enc(mpk,  cred_key, cred_u, user_key, attr, uid, X_snd, M, msg, len,cipher);
     if(ret != 0)
     {
         printf("acme.Enc Erro ret =%d\n",ret);
@@ -140,13 +143,14 @@ int speed_test()
     clock_t start,finish;
     double sum;
 
-
     PFC pfc(AES_SECURITY);
     ACME acme(&pfc);
     printf("#################test acme speed start#######################\n");
     printf("The number of user attributes `n` is %d \n",FAC_PARA_N);
-    printf("The number of disclose attributes is %d \n",FAC_PARA_D);
-    printf("The para of key `k` is %d \n",CP_ABE_PARA_K);
+    printf("The number of disclose attributes 'I' is %d \n",FAC_PARA_D);
+    printf("The para of acme `n` is %d \n",CP_ABE_PARA_N);
+    printf("The para of acme `k` is %d \n",CP_ABE_PARA_K);
+    printf("The para of shar `n` is %d \n",LSS_NC_PARA_N);
     printf("The para of shar `m` is %d \n",LSS_NC_SHARE_NUM);
     int ret =0;
     ACME_MSK msk;
@@ -284,13 +288,15 @@ int speed_test()
     sum = (double)(finish-start)/(CLOCKS_PER_SEC*TEST_TIME);
     printf("acme.IssueUser_Verify ret : %d time =%f sec\n",ret,sum);
     ACME_X X_rcv,X_snd;
+
     for(int i=0;i<CP_ABE_PARA_N;i++)
     {
         X_rcv.X.x[i]=0;
         X_snd.X.x[i]=0;
     }
-    X_rcv.X.x[0]=X_rcv.X.x[2]=1;
-    X_snd.X.x[0]=X_snd.X.x[2]=1;
+    X_rcv.X.x[0]=X_rcv.X.x[2]=1;//{1,0,1} const
+    X_snd.X.x[0]=X_snd.X.x[2]=1;//{1,0,1} const
+
     ACME_ABE_DK_X_REC Dk_xrec;
     start=clock();
     for(i=0;i<TEST_TIME;i++)
@@ -324,10 +330,14 @@ int speed_test()
     ACME_CIPHER cipher;
     ACME_PLAIN plain;
     pfc.random(M);
+    unsigned char msg[512]={0},msg1[512]={0};
+    int len =512,len1=0;
+    for(i=0;i<512;i++)
+        msg[i] = 0xff;
     start=clock();
     for(i=0;i<TEST_TIME;i++)
     {
-        ret =acme.Enc(mpk,  cred_key, cred_u, user_key, attr, uid, X_snd, M, cipher);
+        ret =acme.Enc(mpk,  cred_key, cred_u, user_key, attr, uid, X_snd, M, msg, len, cipher);
         if(ret != 0)
         {
             printf("acme.Enc Erro ret =%d\n",ret);

@@ -173,7 +173,7 @@ int ACME::PolGen(ACME_MSK &msk,ACME_ABE_DK_f_REC &DK_f_rec)
 #endif
     return 0;
 }
-int ACME::Enc(ACME_MPK &mpk, ACME_CRED_KEY cred_key_pk, ACME_CRED_U &cred_snd, ACME_USER_KEY &user_key, USER_ATTR &attr, Big &uid, ACME_X &X_snd, Big &M, ACME_CIPHER &cipher)
+int ACME::Enc(ACME_MPK &mpk, ACME_CRED_KEY cred_key_pk, ACME_CRED_U &cred_snd, ACME_USER_KEY &user_key, USER_ATTR &attr, Big &uid, ACME_X &X_snd, Big &M, unsigned char *msg, int m_len, ACME_CIPHER &cipher)
 {
     FAC_TOK t_tok;
     int ret = fac.Show(cred_key_pk.cred_key.pk,cred_snd.cred_u,attr,cipher.disclose,uid,user_key.user_key,t_tok,M);
@@ -367,6 +367,8 @@ int ACME::Enc(ACME_MPK &mpk, ACME_CRED_KEY cred_key_pk, ACME_CRED_U &cred_snd, A
     memcpy(aes_iv,key.fn->w+2,8);
 
     aes_ctr.init(aes_key,aes_iv);
+    ret = aes_ctr.encrypt_add(msg,m_len);
+    if(ret !=0) return -9;
     ret = aes_ctr.encrypt_add(M);
     if(ret !=0) return -10;
     ret = aes_ctr.encrypt_add(t_tok.T1);
@@ -694,6 +696,8 @@ int ACME::Den(ACME_CRED_KEY cred_key_pk, ACME_ABE_DK_X_REC &Dk_xrec, ACME_ABE_DK
     ret = aes_ctr.decrypt_red(plain.tok.tok.T1);
     if(ret !=0) return -11;    
     ret = aes_ctr.decrypt_red(plain.M);
+    if(ret !=0) return -10;  
+    ret = aes_ctr.decrypt_red(plain.msg,&plain.m_Len);
     if(ret !=0) return -10;  
    
 #endif

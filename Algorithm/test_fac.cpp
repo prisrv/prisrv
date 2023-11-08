@@ -103,7 +103,7 @@ int speed_test()
     FAC_CRED_KEY cred_key;
     printf("#################test fac speed start#######################\n");
     printf("The number of user attributes `n` is %d \n",FAC_PARA_N);
-    printf("The number of disclose attributes is %d \n",FAC_PARA_D);
+    printf("The number of disclose attributes 'I' is %d \n",FAC_PARA_D);
 
     //1. basic
     //G1

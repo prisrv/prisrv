@@ -1,6 +1,7 @@
 #include"prisrv.h"
 
 #define AES_SECURITY 128
+
 int correct()
 {
     PFC pfc(AES_SECURITY);
@@ -552,11 +553,26 @@ int correct()
     cout<<msg_b.Z.g<<endl;
     cout<<"\\--------- z ---------\\"<<endl;
     cout<<z<<endl;
+    cout<<"\\---------- Kc -------------\\"<<endl;
+    cout<<"x:"<<endl;
+    for(int i=0;i<MACddh_PARA_N+1;i++)
+    {
+        cout<<msg_b.K_c.x[i]<<endl;
+
+    }
+    cout<<"y:"<<endl;
+    for(int i=0;i<MACddh_PARA_N+1;i++)
+    {
+        cout<<msg_b.K_c.y[i]<<endl;
+
+    }
+    cout<<"z:"<<endl;
+    cout<<msg_b.K_c.z<<endl;
 
     ////////////////////////////Clint init
     Big x;
     PriSrv_C1 C1_msg;
-    ret =prisrv.AMA_Cinit(mpk, cred_key, cred_c, client_key, Dk_C_xrec, DK_C_frec, X_s, X_c, client_attr, sid, cipher, msg_b, x, C1_msg);
+    ret =prisrv.AMA_Cinit(mpk, cred_key, cred_c, client_key, Dk_C_xrec, DK_C_frec, X_s, X_c, client_attr, sid, cipher,  C1_msg);                
     if(ret != 0)
     {
         printf("prisrv.AMA_Cinit  Erro ret =%d\n",ret);
@@ -582,21 +598,21 @@ int correct()
     cout<<"sigma_z"<<endl;
     cout<<C1_msg.sigma_c.sig_z.g<<endl;
 
-    cout<<"\\---------- Kc -------------\\"<<endl;
+    cout<<"\\---------- Ks -------------\\"<<endl;
     cout<<"x:"<<endl;
     for(int i=0;i<MACddh_PARA_N+1;i++)
     {
-        cout<<C1_msg.msg_c.K_c.x[i]<<endl;
+        cout<<C1_msg.msg_c.K_s.x[i]<<endl;
 
     }
     cout<<"y:"<<endl;
     for(int i=0;i<MACddh_PARA_N+1;i++)
     {
-        cout<<C1_msg.msg_c.K_c.y[i]<<endl;
+        cout<<C1_msg.msg_c.K_s.y[i]<<endl;
 
     }
     cout<<"z:"<<endl;
-    cout<<C1_msg.msg_c.K_c.z<<endl;
+    cout<<C1_msg.msg_c.K_s.z<<endl;
 #if 0
     cout<<"\\---------- tok_c -------------\\"<<endl;
     cout<<"T1"<<endl;
@@ -666,7 +682,7 @@ int correct()
     //////////////////////Service
     PriSrv_S S_msg;
     PriSrv_SSK ssk_s;
-    ret =prisrv.AMA_S(mpk, cred_key, cred_s, service_key,z, service_attr, bid, Dk_S_xrec, DK_S_frec, X_s, X_c, C1_msg, S_msg, ssk_s);
+    ret =prisrv.AMA_S(mpk, cred_key, cred_s, service_key,z, service_attr, bid, Dk_S_xrec, DK_S_frec, X_s, X_c, msg_b, C1_msg, S_msg, ssk_s);
     if(ret != 0)
     {
         printf("prisrv.AMA_S  Erro ret =%d\n",ret);
@@ -763,7 +779,7 @@ int correct()
 
     ///////////////////client rcv
     PriSrv_SSK ssk_c;
-    ret =prisrv.AMA_Cverify(mpk, cred_key, cred_c, client_key, Dk_C_xrec, DK_C_frec, X_s, X_c, client_attr, sid,x, C1_msg, S_msg,ssk_c);
+    ret =prisrv.AMA_Cverify(mpk, cred_key, cred_c, client_key, Dk_C_xrec, DK_C_frec, X_s, X_c, client_attr, sid, C1_msg, S_msg,ssk_c);
     if(ret != 0)
     {
         printf("prisrv.AMA_Cverify  Erro ret =%d\n",ret);
@@ -791,6 +807,7 @@ int correct()
     of.close();
     return 0;
 }
+
 #include <ctime>
 #include <time.h>
 #define TEST_TIME 1
@@ -952,7 +969,7 @@ int speed()
     {
         X_s.X.x[i]=0;
     }
-    X_s.X.x[0]=X_s.X.x[2]=1;
+    X_s.X.x[0]=X_s.X.x[2]=1;//{1,0,1} const
     ACME_ABE_DK_X_REC Dk_S_xrec;
     start=clock();
     for(i=0;i<TEST_TIME;i++)
@@ -1050,7 +1067,7 @@ int speed()
     {
         X_c.X.x[i]=0;
     }
-    X_c.X.x[0]=X_c.X.x[2]=1;
+    X_c.X.x[0]=X_c.X.x[2]=1;//{1,0,1} const
     start=clock();
     for(i=0;i<TEST_TIME;i++)
     {
@@ -1095,13 +1112,14 @@ int speed()
     finish=clock();
     sum = (double)(finish-start)/(CLOCKS_PER_SEC*TEST_TIME);
     printf("prisrv.Broadcast ret : %d time =%f sec\n",ret,sum);
+
     ////////////////////////////Clint init
     Big x;
     PriSrv_C1 C1_msg;
     start=clock();
     for(i=0;i<TEST_TIME;i++)
     {
-        ret =prisrv.AMA_Cinit(mpk, cred_key, cred_c, client_key, Dk_C_xrec, DK_C_frec, X_s, X_c, client_attr, sid, cipher, msg_b, x, C1_msg);
+        ret =prisrv.AMA_Cinit(mpk, cred_key, cred_c, client_key, Dk_C_xrec, DK_C_frec, X_s, X_c, client_attr, sid, cipher, C1_msg);
         if(ret != 0)
         {
             printf("prisrv.AMA_Cinit  Erro ret =%d\n",ret);
@@ -1112,12 +1130,13 @@ int speed()
     sum = (double)(finish-start)/(CLOCKS_PER_SEC*TEST_TIME);
     printf("prisrv.AMA_Cinit ret : %d time =%f sec\n",ret,sum);
     //////////////////////Service
+
     PriSrv_S S_msg;
     PriSrv_SSK ssk_s;
     start=clock();
     for(i=0;i<TEST_TIME;i++)
     {
-        ret =prisrv.AMA_S(mpk, cred_key, cred_s, service_key,z, service_attr, bid, Dk_S_xrec, DK_S_frec, X_s, X_c, C1_msg, S_msg, ssk_s);
+        ret =prisrv.AMA_S(mpk, cred_key, cred_s, service_key,z, service_attr, bid, Dk_S_xrec, DK_S_frec, X_s, X_c, msg_b, C1_msg, S_msg, ssk_s);
         if(ret != 0)
         {
             printf("prisrv.AMA_S  Erro ret =%d\n",ret);
@@ -1128,11 +1147,12 @@ int speed()
     sum = (double)(finish-start)/(CLOCKS_PER_SEC*TEST_TIME);
     printf("prisrv.AMA_S ret : %d time =%f sec\n",ret,sum);
     ///////////////////client rcv
+
     PriSrv_SSK ssk_c;
     start=clock();
     for(i=0;i<TEST_TIME;i++)
     {
-        ret =prisrv.AMA_Cverify(mpk, cred_key, cred_c, client_key, Dk_C_xrec, DK_C_frec, X_s, X_c, client_attr, sid,x, C1_msg, S_msg,ssk_c);
+        ret =prisrv.AMA_Cverify(mpk, cred_key, cred_c, client_key, Dk_C_xrec, DK_C_frec, X_s, X_c, client_attr, sid,C1_msg, S_msg,ssk_c);
         if(ret != 0)
         {
             printf("prisrv.AMA_Cverify  Erro ret =%d\n",ret);
@@ -1154,7 +1174,7 @@ int speed()
 
     ret =prisrv.Trace(cred_key, C1_msg.CT.cipher_tok, bid);
 #endif
-    printf("#################test PriSrv speed end#######################\n");
+    printf("#################test PriSrv speed end #######################\n");
 
     return 0;
 }

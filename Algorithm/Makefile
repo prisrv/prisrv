@@ -3,7 +3,7 @@ CXX = g++
 CC= gcc
 all:
 	make -C MIRACL
-	${CXX} -o test_aes_ctr test_aes_ctr.cpp aes_ctr.cpp bn_transfer.cpp bn_pair.cpp WjCryptLib_Aes.c WjCryptLib_AesCtr.c miracl.a -fpermissive -w -g
+	${CXX} -o test_aes_ctr test_aes_ctr.cpp aes_ctr.cpp bn_transfer.cpp bn_pair.cpp WjCryptLib_Aes.c WjCryptLib_AesCtr.c miracl.a -fpermissive -w -O2
 	${CXX} -o test_fac test_fac.cpp fac.cpp bn_pair.cpp   miracl.a -O2 
 	${CXX} -o test_lss_nc test_lss_nc.cpp lss_nc.cpp bn_pair.cpp   miracl.a -O2 
 	${CXX} -o test_cp_abe test_cp_abe.cpp cp_abe.cpp lss_nc.cpp bn_pair.cpp   miracl.a -O2 

@@ -4,6 +4,7 @@
 #include "pairing_3.h"
 #include "bn_transfer.h"
 #include "WjCryptLib_AesCtr.h"
+
 class AES_CTR
 {
     AesCtrContext State;
@@ -14,12 +15,14 @@ public:
     AES_CTR();
     ~AES_CTR();
     int init(char *key,char *ctr);
+    int encrypt_add(unsigned char *data,int add_len);
     int encrypt_add(Big &data);
     int encrypt_add(G1 &data);
     int encrypt_add(G2 &data);
     int encrypt_add(GT &data);
     int encrypt_data(char *cipher, unsigned int *cipher_len);
     int decrypt_data(char *cipher, unsigned int cipher_len);
+    int decrypt_red(unsigned char *data,int *add_len);
     int decrypt_red(Big &data);
     int decrypt_red(G1 &data);
     int decrypt_red(G2 &data);

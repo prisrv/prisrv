@@ -4,7 +4,7 @@
 #include "lss_nc.h"
 #include "pairing_3.h"
 #define CP_ABE_PARA_K 2
-#define CP_ABE_PARA_N 3
+#define CP_ABE_PARA_N 3 //
 
 struct CP_APE_X
 {

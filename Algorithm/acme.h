@@ -3,7 +3,7 @@
 #include"pairing_3.h"
 #include "fac.h"
 #include "cp_abe.h"
-
+#define CIPHER_LEN 3072
 struct ACME_MSK
 {
     CP_ABE_MSK msk;
@@ -57,6 +57,7 @@ struct ACME_ABE_DK_f_REC
 
 #endif
 };
+
 struct ACME_CIPHER
 {
     GT ct0;
@@ -70,7 +71,7 @@ struct ACME_CIPHER
     Big cipher_M;
     FAC_TOK cipher_tok;
 #endif
-    char cipher[1360];
+    char cipher[CIPHER_LEN];
     unsigned int cipher_len;
     
 
@@ -86,6 +87,8 @@ struct ACME_PLAIN
 {
     ACME_TOK tok;
     Big M;
+    unsigned char msg[2048];
+    int m_Len;
 
 };
 class ACME
@@ -106,7 +109,7 @@ public:
     int IssueUser_Verify(ACME_CRED_KEY_PK &pk,ACME_CRED_U &cred_u,USER_ATTR &attr,Big &uid,ACME_USER_KEY &user_key);
     int DKeyGen(ACME_MSK &msk, ACME_X &X_rcv, ACME_ABE_DK_X_REC &Dk_xrec);
     int PolGen(ACME_MSK &msk,ACME_ABE_DK_f_REC &DK_f_rec);
-    int Enc(ACME_MPK &mpk, ACME_CRED_KEY cred_key_pk, ACME_CRED_U &cred_snd, ACME_USER_KEY &user_key, USER_ATTR &attr, Big &uid, ACME_X &X_snd, Big &M, ACME_CIPHER &cipher);
+    int Enc(ACME_MPK &mpk, ACME_CRED_KEY cred_key_pk, ACME_CRED_U &cred_snd, ACME_USER_KEY &user_key, USER_ATTR &attr, Big &uid, ACME_X &X_snd, Big &M, unsigned char *msg, int m_len, ACME_CIPHER &cipher);
     int Den(ACME_CRED_KEY cred_key_pk,ACME_ABE_DK_X_REC &Dk_xrec,ACME_ABE_DK_f_REC &DK_f_rec,ACME_X &X_snd,ACME_X &X_rcv,ACME_CIPHER &cipher,ACME_PLAIN &plain);
     int Trace(ACME_CRED_KEY &cred_key, ACME_TOK &tok, Big &uid);
 

@@ -16,7 +16,12 @@ CP_ABE::~CP_ABE()
     delete lss;
 }
 int CP_ABE::SetUp(CP_ABE_MSK &msk,CP_ABE_MPK &mpk)
-{    
+{   
+    if(CP_ABE_PARA_N != LSS_NC_PARA_N)
+    {
+        printf("Parameter n =%d of LSS and parameter n =%d of ABE do not match\n",LSS_NC_PARA_N,CP_ABE_PARA_N);
+        return -1;
+    } 
     //return 0;
     //A,[A]1,k*2k
     for(int i=0;i<CP_ABE_PARA_K;i++)

@@ -12,6 +12,7 @@ struct PriSrv_MSG_B
     Big Service_type;
     Big Service_par;
     G2 Z;
+    MACddh_SK K_c;
 };
 struct PriSrv_M_C
 {
@@ -22,9 +23,9 @@ struct PriSrv_M_C
 };
 struct PriSrv_MSG_C
 {
-    MACddh_SK K_c;
-    FAC_TOK tok_c;
-    FAC_USER_DISCLOSE_ATTR Disclose_c;
+    MACddh_SK K_s;
+    //FAC_TOK tok_c;
+    //FAC_USER_DISCLOSE_ATTR Disclose_c;    
     PriSrv_M_C M_c;
 };
 struct PriSrv_MSG_S
@@ -75,9 +76,9 @@ public:
     int DKeyGen(ACME_MSK &msk, ACME_X &X_rcv, ACME_ABE_DK_X_REC &Dk_xrec);
     int PolGen(ACME_MSK &msk,ACME_ABE_DK_f_REC &DK_frec);
     int Broadcast(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cred_s, ACME_USER_KEY &service_key, USER_ATTR &service_attr, Big &bid, ACME_X &X_s, ACME_CIPHER &cipher, PriSrv_MSG_B &msg_b, Big &service_z);
-    int AMA_Cinit(ACME_MPK &mpk,ACME_CRED_KEY &cred_key_pk,ACME_CRED_U &cred_c,ACME_USER_KEY &client_key,ACME_ABE_DK_X_REC &Dk_C_xrec,ACME_ABE_DK_f_REC &DK_C_frec,ACME_X &X_s, ACME_X &X_c,USER_ATTR &client_attr,Big &uid,ACME_CIPHER &cipher,PriSrv_MSG_B &msg_b,Big &x,PriSrv_C1 &C1_msg);
-    int AMA_S(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cred_s, ACME_USER_KEY &service_key, Big &service_z, USER_ATTR &service_attr, Big &sid, ACME_ABE_DK_X_REC &Dk_S_xrec, ACME_ABE_DK_f_REC &DK_S_frec, ACME_X &X_s, ACME_X &X_c, PriSrv_C1 &C1_msg, PriSrv_S &S_msg, PriSrv_SSK &ssk);
-    int AMA_Cverify(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cred_c, ACME_USER_KEY &client_key, ACME_ABE_DK_X_REC &Dk_C_xrec, ACME_ABE_DK_f_REC &DK_C_frec, ACME_X &X_s, ACME_X &X_c, USER_ATTR &client_attr, Big &uid, Big &x,PriSrv_C1 &C1_msg,PriSrv_S &S_msg, PriSrv_SSK &ssk);
+    int AMA_Cinit(ACME_MPK &mpk,ACME_CRED_KEY &cred_key_pk,ACME_CRED_U &cred_c,ACME_USER_KEY &client_key,ACME_ABE_DK_X_REC &Dk_C_xrec,ACME_ABE_DK_f_REC &DK_C_frec,ACME_X &X_s, ACME_X &X_c,USER_ATTR &client_attr,Big &uid,ACME_CIPHER &cipher,PriSrv_C1 &C1_msg);
+    int AMA_S(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cred_s, ACME_USER_KEY &service_key, Big &service_z, USER_ATTR &service_attr, Big &sid, ACME_ABE_DK_X_REC &Dk_S_xrec, ACME_ABE_DK_f_REC &DK_S_frec, ACME_X &X_s, ACME_X &X_c, PriSrv_MSG_B &msg_b, PriSrv_C1 &C1_msg, PriSrv_S &S_msg, PriSrv_SSK &ssk);
+    int AMA_Cverify(ACME_MPK &mpk, ACME_CRED_KEY &cred_key_pk, ACME_CRED_U &cred_c, ACME_USER_KEY &client_key, ACME_ABE_DK_X_REC &Dk_C_xrec, ACME_ABE_DK_f_REC &DK_C_frec, ACME_X &X_s, ACME_X &X_c, USER_ATTR &client_attr, Big &uid, PriSrv_C1 &C1_msg,PriSrv_S &S_msg, PriSrv_SSK &ssk);
     int Trace(ACME_CRED_KEY &cred_key, ACME_TOK &tok, Big &uid);
 };
 

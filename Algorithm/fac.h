@@ -4,8 +4,8 @@
 #include <iostream>
 #include "pairing_3.h"
 
-#define FAC_PARA_N 5 //parameter n [1,n]
-#define FAC_PARA_D 2 //parameter |I| [1,|I|]
+#define FAC_PARA_N 10 //parameter n [1,n]
+#define FAC_PARA_D 4 //parameter |I| [1,|I|]
 struct FAC_PP
 {
 
@@ -106,7 +106,7 @@ private:
 public:
     FAC(PFC *p);
     ~FAC();
-//    int SetUp(FAC_PP &fac_pp);
+//  int SetUp(FAC_PP &fac_pp);
     //key generate
     int CredKeyGen(FAC_CRED_KEY &cred_key);
     int UserKeyGen(FAC_USER_KEY &user_key);
